@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 public class GhprbSimpleStatus extends GhprbExtension implements
         GhprbCommitStatus, GhprbGlobalExtension, GhprbProjectExtension, GhprbGlobalDefault {
@@ -50,6 +51,8 @@ public class GhprbSimpleStatus extends GhprbExtension implements
     private final Boolean addTestResults;
 
     private final List<GhprbBuildResultMessage> completedStatus;
+
+    private Map<GHCommitState, GhprbBuildResultMessage> completedStatusOverride;
 
     public GhprbSimpleStatus() {
         this(null);
@@ -74,6 +77,7 @@ public class GhprbSimpleStatus extends GhprbExtension implements
         this.startedStatus = startedStatus;
         this.addTestResults = addTestResults;
         this.completedStatus = completedStatus;
+        completedStatusOverride = new HashMap<GHCommitState, GhprbBuildResultMessage>();
     }
 
     public String getStatusUrl() {
@@ -102,6 +106,14 @@ public class GhprbSimpleStatus extends GhprbExtension implements
 
     public List<GhprbBuildResultMessage> getCompletedStatus() {
         return completedStatus == null ? new ArrayList<GhprbBuildResultMessage>(0) : completedStatus;
+    }
+
+    public Map<GHCommitState, GhprbBuildResultMessage> getCompletedStatusOverride() {
+        return completedStatusOverride;
+    }
+
+    public void overrideCompletedStatus(GhprbBuildResultMessage message) {
+        completedStatusOverride.put(message.getResult(), message);
     }
 
     public boolean addIfMissing() {
@@ -211,6 +223,10 @@ public class GhprbSimpleStatus extends GhprbExtension implements
 
         StringBuilder sb = new StringBuilder();
 
+        GhprbBuildResultMessage overrideMessage = completedStatusOverride.get(state);
+        if (overrideMessage != null) {
+            sb.append(overrideMessage.postBuildComment(build, listener));
+        } else
         if (completedStatus == null || completedStatus.isEmpty()) {
             sb.append("Build finished.");
         } else {
