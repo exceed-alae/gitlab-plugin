@@ -321,6 +321,7 @@ public final class GhprbTestUtil {
         jsonObject.put("commitStatusContext", "Status Context");
         jsonObject.put("blackListLabels", "in progress");
         jsonObject.put("whiteListLabels", "");
+        jsonObject.put("ignoreWhitelistAddition", "false");
 
         JSONObject githubAuth = new JSONObject();
         githubAuth.put("credentialsId", getCredentialsId());

@@ -167,8 +167,10 @@ public class GhprbPullRequest {
             LOGGER.log(Level.INFO,
                     "Author of #{0} {1} on {2} not in whitelist!",
                     new Object[] {id, author.getLogin(), reponame});
-            if (!containsComment(pr, getRequestForTestingPhrase())) {
-                repo.addComment(id, GhprbTrigger.getDscp().getRequestForTestingPhrase());
+            if (!ghprb.isIgnoreWhitelistAddition()) {
+                if (!containsComment(pr, getRequestForTestingPhrase())) {
+                    repo.addComment(id, GhprbTrigger.getDscp().getRequestForTestingPhrase());
+                }
             }
         }
 
@@ -596,7 +598,7 @@ public class GhprbPullRequest {
         // return;
         // }
 
-        if (helper.isWhitelistPhrase(body) && helper.isAdmin(sender)) { // add to whitelist
+        if (helper.isWhitelistPhrase(body) && helper.isAdmin(sender) && !helper.isIgnoreWhitelistAddition()) { // add to whitelist
             GHIssue parent = comment.getParent();
             GHUser author = parent.getUser();
             if (!helper.isWhitelisted(author)) {

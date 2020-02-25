@@ -55,6 +55,9 @@ f.section(title: descriptor.displayName) {
     f.entry(field: "whiteListLabels", title: _("List of GitHub labels for which the build should only be triggered. (Leave blank for 'any')")) {
       f.textarea()
     }
+    f.entry(field: "ignoreWhitelistAddition", title: _("Ignore whitelist addition framework")) {
+      f.checkbox()
+    }
   }
   f.entry(title: _("Application Setup")) {
     f.hetero_list(items: descriptor.extensions, name: "extensions", oneEach: "true", hasHeader: "true", descriptors: descriptor.getGlobalExtensionDescriptors()) 

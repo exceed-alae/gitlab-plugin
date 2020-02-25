@@ -135,6 +135,8 @@ public class GhprbTrigger extends GhprbTriggerBackwardsCompatible {
 
     private String excludedRegions;
 
+    private Boolean ignoreWhitelistAddition;
+
 
     private transient Ghprb helper;
 
@@ -198,7 +200,8 @@ public class GhprbTrigger extends GhprbTriggerBackwardsCompatible {
                         String whiteListLabels,
                         List<GhprbExtension> extensions,
                         String includedRegions,
-                        String excludedRegions
+                        String excludedRegions,
+                        Boolean ignoreWhitelistAddition
     ) throws ANTLRException {
         super(cron);
         this.adminlist = adminlist;
@@ -222,6 +225,7 @@ public class GhprbTrigger extends GhprbTriggerBackwardsCompatible {
         this.whiteListLabels = whiteListLabels;
         this.includedRegions = includedRegions;
         this.excludedRegions = excludedRegions;
+        this.ignoreWhitelistAddition = ignoreWhitelistAddition;
         setExtensions(extensions);
         configVersion = LATEST_VERSION;
     }
@@ -661,6 +665,14 @@ public class GhprbTrigger extends GhprbTriggerBackwardsCompatible {
         return excludedRegions;
     }
 
+    public Boolean getIgnoreWhitelistAddition() {
+        if (ignoreWhitelistAddition == null) {
+            Boolean ignoreAddition = getDescriptor().getIgnoreWhitelistAddition();
+            return (ignoreAddition != null && ignoreAddition);
+        }
+        return ignoreWhitelistAddition;
+    }
+
     @Override
     public DescriptorImpl getDescriptor() {
         return DESCRIPTOR;
@@ -798,6 +810,8 @@ public class GhprbTrigger extends GhprbTriggerBackwardsCompatible {
 
         private String whiteListLabels;
 
+        private Boolean ignoreWhitelistAddition = false;
+
         private List<GhprbGitHubAuth> githubAuth;
 
         public GhprbGitHubAuth getGitHubAuth(String gitHubAuthId) {
@@ -913,6 +927,7 @@ public class GhprbTrigger extends GhprbTriggerBackwardsCompatible {
             displayBuildErrorsOnDownstreamBuilds = formData.getBoolean("displayBuildErrorsOnDownstreamBuilds");
             blackListLabels = formData.getString("blackListLabels");
             whiteListLabels = formData.getString("whiteListLabels");
+            ignoreWhitelistAddition = formData.getBoolean("ignoreWhitelistAddition");
 
             githubAuth = req.bindJSONToList(GhprbGitHubAuth.class, formData.get("githubAuth"));
 
@@ -1014,6 +1029,10 @@ public class GhprbTrigger extends GhprbTriggerBackwardsCompatible {
 
         public Boolean getDisplayBuildErrorsOnDownstreamBuilds() {
             return displayBuildErrorsOnDownstreamBuilds;
+        }
+
+        public Boolean getIgnoreWhitelistAddition() {
+            return ignoreWhitelistAddition;
         }
 
         public GHCommitState getUnstableAs() {

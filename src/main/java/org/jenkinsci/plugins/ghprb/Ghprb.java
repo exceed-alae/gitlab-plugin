@@ -292,6 +292,10 @@ public class Ghprb {
         return false;
     }
 
+    public boolean isIgnoreWhitelistAddition() {
+        return trigger.getIgnoreWhitelistAddition();
+    }
+
     List<GhprbBranch> getBlackListTargetBranches() {
         return trigger.getBlackListTargetBranches();
     }

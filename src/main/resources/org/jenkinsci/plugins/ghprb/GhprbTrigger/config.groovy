@@ -88,6 +88,9 @@ f.advanced() {
   f.entry(field: "excludedRegions", title: _("Excluded regions")) {
     f.textarea()
   }
+  f.entry(field: "ignoreWhitelistAddition", title: _("Ignore whitelist addition framework")) {
+    f.checkbox()
+  }
 }
 f.advanced(title: _("Trigger Setup")) {
   f.entry(title: _("Trigger Setup")) {
