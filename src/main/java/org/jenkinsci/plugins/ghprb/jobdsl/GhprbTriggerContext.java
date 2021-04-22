@@ -48,7 +48,7 @@ class GhprbTriggerContext implements Context {
 
     String excludedRegions;
 
-	boolean ignoreWhitelistAddition;
+    boolean ignoreWhitelistAddition;
 
     GhprbExtensionContext extensionContext = new GhprbExtensionContext();
 
@@ -317,7 +317,7 @@ class GhprbTriggerContext implements Context {
         excludedRegions(excludedRegionsStr);
     }
 
-	public void ignoreWhitelistAddition(boolean ignoreWhitelistAddition) {
-		this.ignoreWhitelistAddition = ignoreWhitelistAddition;
-	}
+    public void ignoreWhitelistAddition(boolean ignoreWhitelistAddition) {
+        this.ignoreWhitelistAddition = ignoreWhitelistAddition;
+    }
 }
