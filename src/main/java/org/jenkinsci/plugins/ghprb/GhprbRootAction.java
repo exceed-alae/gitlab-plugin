@@ -20,11 +20,12 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -280,14 +281,14 @@ public class GhprbRootAction implements UnprotectedRootAction {
 
     private String extractRequestBody(StaplerRequest req) {
         String body = null;
-        BufferedReader br = null;
         try {
-            br = req.getReader();
-            body = IOUtils.toString(br);
+            Charset charset = StandardCharsets.UTF_8;
+            if (req.getCharacterEncoding() != null) {
+                charset = Charset.forName(req.getCharacterEncoding());
+            }
+            body = IOUtils.toString(req.getInputStream(), charset);
         } catch (IOException e) {
             body = null;
-        } finally {
-            IOUtils.closeQuietly(br);
         }
         return body;
     }
