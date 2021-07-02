@@ -125,6 +125,7 @@ public class GhprbSimpleStatus extends GhprbExtension implements
                                  boolean isMergeable,
                                  int prId,
                                  GHRepository ghRepository) throws GhprbCommitStatusException {
+        completedStatusOverride = null;
         StringBuilder sb = new StringBuilder();
         GHCommitState state = GHCommitState.PENDING;
         String triggeredStatus = getDescriptor().getTriggeredStatusDefault(this);
@@ -178,6 +179,7 @@ public class GhprbSimpleStatus extends GhprbExtension implements
     public void onBuildStart(Run<?, ?> build,
                              TaskListener listener,
                              GHRepository repo) throws GhprbCommitStatusException {
+        completedStatusOverride = null;
         String startedStatus = getDescriptor().getStartedStatusDefault(this);
 
         // If the showMatrixStatus checkbox is selected and the job is not a Matrix Job (Children
