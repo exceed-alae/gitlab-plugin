@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 public class GhprbSimpleStatus extends GhprbExtension implements
         GhprbCommitStatus, GhprbGlobalExtension, GhprbProjectExtension, GhprbGlobalDefault {
@@ -52,7 +51,7 @@ public class GhprbSimpleStatus extends GhprbExtension implements
 
     private final List<GhprbBuildResultMessage> completedStatus;
 
-    private Map<GHCommitState, GhprbBuildResultMessage> completedStatusOverride;
+    private GhprbBuildResultMessage completedStatusOverride;
 
     public GhprbSimpleStatus() {
         this(null);
@@ -77,7 +76,7 @@ public class GhprbSimpleStatus extends GhprbExtension implements
         this.startedStatus = startedStatus;
         this.addTestResults = addTestResults;
         this.completedStatus = completedStatus;
-        completedStatusOverride = new HashMap<GHCommitState, GhprbBuildResultMessage>();
+        completedStatusOverride = null;
     }
 
     public String getStatusUrl() {
@@ -108,12 +107,12 @@ public class GhprbSimpleStatus extends GhprbExtension implements
         return completedStatus == null ? new ArrayList<GhprbBuildResultMessage>(0) : completedStatus;
     }
 
-    public Map<GHCommitState, GhprbBuildResultMessage> getCompletedStatusOverride() {
-        return completedStatusOverride;
+    public GhprbBuildResultMessage getCompletedStatusOverride() {
+        return completedStatusOverride == null ? new GhprbBuildResultMessage(GHCommitState.SUCCESS, "") : completedStatusOverride;
     }
 
     public void overrideCompletedStatus(GhprbBuildResultMessage message) {
-        completedStatusOverride.put(message.getResult(), message);
+        completedStatusOverride = message;
     }
 
     public boolean addIfMissing() {
@@ -223,11 +222,12 @@ public class GhprbSimpleStatus extends GhprbExtension implements
 
         StringBuilder sb = new StringBuilder();
 
-        GhprbBuildResultMessage overrideMessage = completedStatusOverride.get(state);
-        if (overrideMessage != null) {
-            sb.append(overrideMessage.postBuildComment(build, listener));
-        } else
-        if (completedStatus == null || completedStatus.isEmpty()) {
+        if (completedStatusOverride != null
+            && completedStatusOverride.getMessage() != null
+            && completedStatusOverride.getMessage().length() > 0) {
+            sb.append((new GhprbBuildResultMessage(state, completedStatusOverride.getMessage())).postBuildComment(build, listener));
+            state = completedStatusOverride.getResult();
+        } else if (completedStatus == null || completedStatus.isEmpty()) {
             sb.append("Build finished.");
         } else {
             for (GhprbBuildResultMessage buildStatus : completedStatus) {
