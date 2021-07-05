@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 public class GhprbSimpleStatus extends GhprbExtension implements
         GhprbCommitStatus, GhprbGlobalExtension, GhprbProjectExtension, GhprbGlobalDefault {
@@ -51,7 +52,7 @@ public class GhprbSimpleStatus extends GhprbExtension implements
 
     private final List<GhprbBuildResultMessage> completedStatus;
 
-    private GhprbBuildResultMessage completedStatusOverride;
+    private Map<String, GhprbBuildResultMessage> completedStatusOverrideMap;
 
     public GhprbSimpleStatus() {
         this(null);
@@ -76,7 +77,7 @@ public class GhprbSimpleStatus extends GhprbExtension implements
         this.startedStatus = startedStatus;
         this.addTestResults = addTestResults;
         this.completedStatus = completedStatus;
-        completedStatusOverride = null;
+        completedStatusOverrideMap = new HashMap<String, GhprbBuildResultMessage>();
     }
 
     public String getStatusUrl() {
@@ -107,12 +108,16 @@ public class GhprbSimpleStatus extends GhprbExtension implements
         return completedStatus == null ? new ArrayList<GhprbBuildResultMessage>(0) : completedStatus;
     }
 
-    public GhprbBuildResultMessage getCompletedStatusOverride() {
-        return completedStatusOverride == null ? new GhprbBuildResultMessage(GHCommitState.SUCCESS, "") : completedStatusOverride;
+    public Map<String, GhprbBuildResultMessage> getCompletedStatusOverrideMap() {
+        return completedStatusOverrideMap;
     }
 
     public void overrideCompletedStatus(GhprbBuildResultMessage message) {
-        completedStatusOverride = message;
+        overrideCompletedStatus(null, message);
+    }
+
+    public void overrideCompletedStatus(Run<?, ?> build, GhprbBuildResultMessage message) {
+        completedStatusOverrideMap.put(build.getExternalizableId(), message);
     }
 
     public boolean addIfMissing() {
@@ -125,7 +130,6 @@ public class GhprbSimpleStatus extends GhprbExtension implements
                                  boolean isMergeable,
                                  int prId,
                                  GHRepository ghRepository) throws GhprbCommitStatusException {
-        completedStatusOverride = null;
         StringBuilder sb = new StringBuilder();
         GHCommitState state = GHCommitState.PENDING;
         String triggeredStatus = getDescriptor().getTriggeredStatusDefault(this);
@@ -179,7 +183,6 @@ public class GhprbSimpleStatus extends GhprbExtension implements
     public void onBuildStart(Run<?, ?> build,
                              TaskListener listener,
                              GHRepository repo) throws GhprbCommitStatusException {
-        completedStatusOverride = null;
         String startedStatus = getDescriptor().getStartedStatusDefault(this);
 
         // If the showMatrixStatus checkbox is selected and the job is not a Matrix Job (Children
@@ -223,12 +226,12 @@ public class GhprbSimpleStatus extends GhprbExtension implements
         GHCommitState state = Ghprb.getState(build);
 
         StringBuilder sb = new StringBuilder();
+        GhprbBuildResultMessage completedStatusOverride = completedStatusOverrideMap.get(build.getExternalizableId());
 
-        if (completedStatusOverride != null
-            && completedStatusOverride.getMessage() != null
-            && completedStatusOverride.getMessage().length() > 0) {
+        if (completedStatusOverride != null) {
             sb.append((new GhprbBuildResultMessage(state, completedStatusOverride.getMessage())).postBuildComment(build, listener));
             state = completedStatusOverride.getResult();
+            completedStatusOverrideMap.remove(build.getExternalizableId());
         } else if (completedStatus == null || completedStatus.isEmpty()) {
             sb.append("Build finished.");
         } else {
